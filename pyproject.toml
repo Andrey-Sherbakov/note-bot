@@ -1,0 +1,17 @@
+[project]
+name = "note-bot"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "aiogram>=3.21.0",
+    "pydantic-settings>=2.10.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.2",
+]
+
+[tool.ruff]
+line-length = 100
