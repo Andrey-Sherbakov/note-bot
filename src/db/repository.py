@@ -24,3 +24,15 @@ async def create_note(new_note: BaseNote) -> None:
         note = Note(**new_note.model_dump())
         session.add(note)
         await session.commit()
+
+
+async def update_note(note: Note) -> None:
+    async with SessionMaker() as session:
+        session.add(note)
+        await session.commit()
+
+
+async def delete_note(note: Note) -> None:
+    async with SessionMaker() as session:
+        await session.delete(note)
+        await session.commit()
