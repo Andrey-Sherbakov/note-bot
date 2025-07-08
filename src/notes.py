@@ -70,4 +70,3 @@ async def text_entered(message: Message, state: FSMContext) -> None:
         await message.answer("Note added!")
     except Exception as e:
         await message.answer(f"Something went wrong: {e}", parse_mode=None)
-    
