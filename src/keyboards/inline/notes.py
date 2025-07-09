@@ -30,5 +30,5 @@ def get_note_inline_kb(note_id: int, note_name: str) -> InlineKeyboardMarkup:
         text=NoteInlineButtons.delete, callback_data=NoteInlineCallbacks.delete + note_data
     )
 
-    builder.adjust(2)
+    builder.adjust(3)
     return builder.as_markup()
