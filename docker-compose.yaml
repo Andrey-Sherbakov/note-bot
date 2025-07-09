@@ -1,7 +1,7 @@
 services:
   note-bot:
     build: .
-    container_name: mail-service
+    container_name: note-bot
     restart: always
     command: [ "uv", "run", "python", "src/main.py" ]
     ports:
