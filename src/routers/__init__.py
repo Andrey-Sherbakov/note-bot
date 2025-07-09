@@ -9,8 +9,8 @@ router = Router(name=__name__)
 
 router.include_routers(
     callback_router,
-    notes_router,
     base_router,
+    notes_router,
 )
 
 __all__ = [router]
