@@ -1,8 +1,8 @@
 from sqlalchemy import select
 
-from src.db.base import SessionMaker
-from src.db.models import Note
-from src.db.schemas import BaseNote
+from db.base import SessionMaker
+from db.models import Note
+from db.schemas import BaseNote
 
 
 async def get_all_notes() -> list[Note]:

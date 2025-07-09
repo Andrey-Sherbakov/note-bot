@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
-from src.keyboards import BaseButtons, StartButtons, get_start_kb
+from keyboards import BaseButtons, get_start_kb, StartButtons
 
 router = Router(name=__name__)
 

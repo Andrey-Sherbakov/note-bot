@@ -1,0 +1,15 @@
+services:
+  mail-service:
+    build: .
+    container_name: mail-service
+    restart: always
+    command: [ "uv", "run", "python", "src/main.py" ]
+    ports:
+      - "8002:8000"
+    networks:
+      - pomodoro-net
+
+
+networks:
+  pomodoro-net:
+    external: true

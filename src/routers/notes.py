@@ -5,10 +5,10 @@ from aiogram.types import Message
 from aiogram.utils.chat_action import ChatActionSender
 from aiogram.utils.markdown import hitalic, hbold
 
-from src.db import repository
-from src.db.schemas import BaseNote
-from src.keyboards import NotesButtons, StartButtons, get_notes_kb
-from src.states import AddNoteQuery, GetNoteQuery, UpdateNoteQuery, DeleteNoteQuery
+from db import repository
+from db.schemas import BaseNote
+from keyboards import NotesButtons, StartButtons, get_notes_kb
+from states import AddNoteQuery, GetNoteQuery, UpdateNoteQuery, DeleteNoteQuery
 
 router = Router(name=__name__)
 
