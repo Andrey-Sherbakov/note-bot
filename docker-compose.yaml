@@ -1,5 +1,5 @@
 services:
-  mail-service:
+  note-bot:
     build: .
     container_name: mail-service
     restart: always
