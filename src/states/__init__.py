@@ -1,3 +1,3 @@
-from .notes import AddNoteQuery, GetNoteQuery, UpdateNoteQuery, DeleteNoteQuery
+from .notes import AddNoteState, GetNoteState, UpdateNoteState, DeleteNoteState
 
-__all__ = [AddNoteQuery, GetNoteQuery, UpdateNoteQuery, DeleteNoteQuery]
+__all__ = [AddNoteState, GetNoteState, UpdateNoteState, DeleteNoteState]

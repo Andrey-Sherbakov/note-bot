@@ -1,20 +1,20 @@
 from aiogram.fsm.state import StatesGroup, State
 
 
-class GetNoteQuery(StatesGroup):
-    waiting_name = State()
+class GetNoteState(StatesGroup):
+    name = State()
 
 
-class AddNoteQuery(StatesGroup):
-    waiting_name = State()
-    waiting_text = State()
+class AddNoteState(StatesGroup):
+    name = State()
+    text = State()
 
 
-class UpdateNoteQuery(StatesGroup):
-    waiting_name = State()
-    waiting_text = State()
+class UpdateNoteState(StatesGroup):
+    name = State()
+    text = State()
 
 
-class DeleteNoteQuery(StatesGroup):
-    waiting_name = State()
-    waiting_confirmation = State()
+class DeleteNoteState(StatesGroup):
+    name = State()
+    confirmation = State()

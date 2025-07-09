@@ -7,8 +7,9 @@ from aiogram.utils.markdown import hitalic, hbold
 
 from db import repository
 from db.schemas import BaseNote
-from keyboards import NotesButtons, StartButtons, get_notes_kb
-from states import AddNoteQuery, GetNoteQuery, UpdateNoteQuery, DeleteNoteQuery
+from keyboards.reply import NotesButtons, StartButtons, get_notes_kb
+from service import notes as notes_service
+from states import AddNoteState, GetNoteState, UpdateNoteState, DeleteNoteState
 
 router = Router(name=__name__)
 
@@ -46,19 +47,17 @@ async def get_all_notes(message: Message) -> None:
 @router.message(F.text == NotesButtons.one)
 @router.message(Command("get"))
 async def get_note(message: Message, state: FSMContext) -> None:
-    await message.answer("Enter note name:")
-    await state.set_state(GetNoteQuery.waiting_name)
-
-
-@router.message(GetNoteQuery.waiting_name)
-async def get_note_state_name(message: Message, state: FSMContext) -> None:
-    name = message.text.strip().lower()
-    note = await repository.get_one(name=name)
-    if note:
-        await message.answer(note.text)
+    args = message.text.strip().split(" ")
+    if args[0].startswith("/") and len(args) == 2:
+        await notes_service.start_get_note(name=args[1], message=message, state=state)
     else:
-        await message.answer("Note with that name does not exist.")
-    await state.clear()
+        await message.answer("Название заметки:")
+        await state.set_state(GetNoteState.name)
+
+
+@router.message(GetNoteState.name)
+async def get_note_state_name(message: Message, state: FSMContext) -> None:
+    await notes_service.start_get_note(name=message.text, message=message, state=state)
 
 
 # add note
@@ -66,17 +65,17 @@ async def get_note_state_name(message: Message, state: FSMContext) -> None:
 @router.message(Command("add"))
 async def handle_add(message: Message, state: FSMContext) -> None:
     await message.answer("Enter new note name:")
-    await state.set_state(AddNoteQuery.waiting_name)
+    await state.set_state(AddNoteState.name)
 
 
-@router.message(AddNoteQuery.waiting_name)
+@router.message(AddNoteState.name)
 async def name_entered(message: Message, state: FSMContext) -> None:
     await state.update_data(note_name=message.text.strip().lower())
     await message.answer("Enter new note text:")
-    await state.set_state(AddNoteQuery.waiting_text)
+    await state.set_state(AddNoteState.text)
 
 
-@router.message(AddNoteQuery.waiting_text)
+@router.message(AddNoteState.text)
 async def text_entered(message: Message, state: FSMContext) -> None:
     try:
         new_note = BaseNote(
@@ -94,40 +93,31 @@ async def text_entered(message: Message, state: FSMContext) -> None:
 @router.message(F.text == NotesButtons.update)
 @router.message(Command("update"))
 async def update_note(message: Message, state: FSMContext) -> None:
-    await message.answer("Enter note name:")
-    await state.set_state(UpdateNoteQuery.waiting_name)
+    args = message.text.strip().split(" ")
+    print(args)
+    if len(args) == 2:
+        await notes_service.start_note_update(name=args[1], message=message, state=state)
+    else:
+        await message.answer("Название заметки:")
+        await state.set_state(UpdateNoteState.name)
 
 
-@router.message(UpdateNoteQuery.waiting_name)
+@router.message(UpdateNoteState.name)
 async def update_note_state_name(message: Message, state: FSMContext) -> None:
     if not message.text:
-        await message.answer("Please enter name:")
+        await message.answer("Введите название заметки:")
         return
 
-    name = message.text.strip().lower()
-    note = await repository.get_one(name=name)
-    if note:
-        await message.answer("Enter new text:")
-        await state.update_data(note=note)
-        await state.set_state(UpdateNoteQuery.waiting_text)
-    else:
-        await message.answer("Note with that name does not exist.")
-        await state.clear()
+    await notes_service.start_note_update(name=message.text, message=message, state=state)
 
 
-@router.message(UpdateNoteQuery.waiting_text)
+@router.message(UpdateNoteState.text)
 async def update_note_state_text(message: Message, state: FSMContext) -> None:
     if not message.text:
-        await message.answer("Please enter valid text:")
+        await message.answer("Введите обновленный текст:")
         return
 
-    data = await state.get_data()
-    note = data["note"]
-    note.text = message.text.strip()
-
-    await repository.update_note(note)
-    await message.answer("Note updated!")
-    await state.clear()
+    await notes_service.end_note_update(message=message, state=state)
 
 
 # delete note
@@ -135,29 +125,29 @@ async def update_note_state_text(message: Message, state: FSMContext) -> None:
 @router.message(Command("delete"))
 async def delete_note(message: Message, state: FSMContext) -> None:
     await message.answer("Enter note name:")
-    await state.set_state(DeleteNoteQuery.waiting_name)
+    await state.set_state(DeleteNoteState.name)
 
 
-@router.message(DeleteNoteQuery.waiting_name)
+@router.message(DeleteNoteState.name)
 async def delete_note_state_name(message: Message, state: FSMContext) -> None:
     if not message.text:
         await message.answer("Please enter name:")
         return
 
     name = message.text.strip().lower()
-    note = await repository.get_one(name=name)
+    note = await repository.get_by_name(name=name)
     if note:
         await state.update_data(note=note)
         await message.answer(
             f"Delete note: {hbold(note.name)}?\n" + hitalic("Y/Д - Yes/Да, N/Н - No/Нет")
         )
-        await state.set_state(DeleteNoteQuery.waiting_confirmation)
+        await state.set_state(DeleteNoteState.confirmation)
     else:
         await message.answer("Note with that name does not exist.")
         await state.clear()
 
 
-@router.message(DeleteNoteQuery.waiting_confirmation)
+@router.message(DeleteNoteState.confirmation)
 async def delete_note_state_confirmation(message: Message, state: FSMContext) -> None:
     if not message.text:
         await message.answer("Please enter valid symbol:" + hitalic("Y/Д - Yes/Да, N/Н - No/Нет"))
@@ -178,5 +168,13 @@ async def delete_note_state_confirmation(message: Message, state: FSMContext) ->
         await state.clear()
 
     else:
-        await message.answer("Please enter valid symbol:" + hitalic('Y/Д - Yes/Да, N/Н - No/Нет'))
+        await message.answer("Please enter valid symbol:" + hitalic("Y/Д - Yes/Да, N/Н - No/Нет"))
 
+
+# default handler
+@router.message()
+async def default_message(message: Message, state: FSMContext) -> None:
+    if not message.text:
+        await message.answer(hitalic('Доступные действия: /help'))
+
+    await notes_service.start_get_note(name=message.text, message=message, state=state)

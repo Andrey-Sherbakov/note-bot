@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
-from keyboards import BaseButtons, get_start_kb, StartButtons
+from keyboards.reply import BaseButtons, get_start_kb, StartButtons
 
 router = Router(name=__name__)
 
@@ -21,7 +21,7 @@ async def handle_start(message: Message) -> None:
 @router.message(F.text == StartButtons.help)
 @router.message(Command("help"))
 async def handle_help(message: Message) -> None:
-    await message.answer("Available commands:\n - /start\n - /help")
+    await message.answer("Available commands:\n - /start\n - /help\n - /notes")
 
 
 @router.message(F.text == BaseButtons.stop)

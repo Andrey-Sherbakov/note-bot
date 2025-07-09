@@ -12,9 +12,16 @@ async def get_all_notes() -> list[Note]:
         return res.all()
 
 
-async def get_one(name: str) -> Note | None:
+async def get_by_name(name: str) -> Note | None:
     async with SessionMaker() as session:
         stmt = select(Note).where(Note.name == name)
+        res = await session.scalar(stmt)
+        return res
+
+
+async def get_by_id(note_id: int) -> Note | None:
+    async with SessionMaker() as session:
+        stmt = select(Note).where(Note.id == note_id)
         res = await session.scalar(stmt)
         return res
 
@@ -36,3 +43,10 @@ async def delete_note(note: Note) -> None:
     async with SessionMaker() as session:
         await session.delete(note)
         await session.commit()
+
+
+async def search_by_prefix(prefix: str, limit: int = 10):
+    async with SessionMaker() as session:
+        stmt = select(Note).where(Note.name.ilike(f"{prefix}%")).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
