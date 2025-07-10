@@ -8,3 +8,4 @@ class Note(Base):
 
     name: Mapped[str] = mapped_column(index=True)
     text: Mapped[str] = mapped_column()
+    user_id: Mapped[int] = mapped_column(index=True)

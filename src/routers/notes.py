@@ -7,6 +7,7 @@ from aiogram.utils.markdown import hitalic
 
 from db import repository
 from db.schemas import BaseNote
+from keyboards.inline import get_all_notes_inline_kb
 from keyboards.reply import NotesButtons, StartButtons, get_notes_kb
 from service import notes as notes_service
 from states import AddNoteState, GetNoteState, UpdateNoteState, DeleteNoteState, RenameNoteState
@@ -21,7 +22,7 @@ async def handle_notes(message: Message, state: FSMContext) -> None:
         "Модуль работы с заметками.\n\n"
         + hitalic(
             "Доступные действия:",
-            " 1. Все заметки - /getall",
+            " 1. Все заметки - /all",
             " 2. Одна заметка - /get",
             " 3. Создать заметку - /add",
             " 5. Переименовать заметку - /rename",
@@ -36,12 +37,16 @@ async def handle_notes(message: Message, state: FSMContext) -> None:
 
 # get all notes
 @router.message(F.text == NotesButtons.all)
-@router.message(Command("getall"))
+@router.message(Command("all"))
 async def get_all_notes(message: Message) -> None:
     async with ChatActionSender.typing(chat_id=message.chat.id, bot=message.bot):
-        all_notes = await repository.get_all_notes()
+        all_notes = await repository.get_all_notes(user_id=message.from_user.id)
+        if not all_notes:
+            await message.answer("Заметок пока нет.")
+            return
+
         text = "\n\n".join(f"<b>{note.name}</b>: {note.text}" for note in all_notes)
-        await message.answer(text)
+        await message.answer(text, reply_markup=get_all_notes_inline_kb(all_notes))
 
 
 # get one note
@@ -50,7 +55,9 @@ async def get_all_notes(message: Message) -> None:
 async def get_note(message: Message, state: FSMContext) -> None:
     args = message.text.strip().split(" ")
     if args[0].startswith("/") and len(args) == 2:
-        await notes_service.start_get_note(name=args[1], message=message, state=state)
+        await notes_service.start_get_note(
+            name=args[1], user_id=message.from_user.id, message=message, state=state
+        )
     else:
         await message.answer("Название заметки:")
         await state.set_state(GetNoteState.name)
@@ -58,7 +65,9 @@ async def get_note(message: Message, state: FSMContext) -> None:
 
 @router.message(GetNoteState.name)
 async def get_note_state_name(message: Message, state: FSMContext) -> None:
-    await notes_service.start_get_note(name=message.text, message=message, state=state)
+    await notes_service.start_get_note(
+        name=message.text, user_id=message.from_user.id, message=message, state=state
+    )
 
 
 # add note
@@ -82,6 +91,7 @@ async def text_entered(message: Message, state: FSMContext) -> None:
         new_note = BaseNote(
             name=(await state.get_data()).get("note_name"),
             text=message.text.strip(),
+            user_id=message.from_user.id,
         )
         await repository.create_note(new_note=new_note)
         await message.answer("Note added!")
@@ -186,6 +196,8 @@ async def delete_note_state_confirmation(message: Message, state: FSMContext) ->
 @router.message()
 async def default_message(message: Message, state: FSMContext) -> None:
     if not message.text:
-        await message.answer(hitalic('Доступные действия: /help'))
+        await message.answer(hitalic("Доступные действия: /help"))
 
-    await notes_service.start_get_note(name=message.text, message=message, state=state)
+    await notes_service.start_get_note(
+        name=message.text, user_id=message.from_user.id, message=message, state=state
+    )

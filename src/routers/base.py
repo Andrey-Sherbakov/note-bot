@@ -1,5 +1,5 @@
 from aiogram import F, Router
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
@@ -9,11 +9,11 @@ router = Router(name=__name__)
 
 
 @router.message(F.text == BaseButtons.start)
-@router.message(Command("start"))
+@router.message(CommandStart())
 async def handle_start(message: Message) -> None:
     await message.answer(
-        f"Welcome, <b>{message.from_user.full_name}</b>!\nThis is simple note taking bot.\n"
-        f"<i>Use /help to see available commands.</i>",
+        f"Добро пожаловать, <b>{message.from_user.full_name}</b>!\nЭто простой бот для заметок.\n"
+        f"<i>Используй /help чтобы увидеть возможные команды.</i>",
         reply_markup=get_start_kb(),
     )
 
@@ -21,7 +21,7 @@ async def handle_start(message: Message) -> None:
 @router.message(F.text == StartButtons.help)
 @router.message(Command("help"))
 async def handle_help(message: Message) -> None:
-    await message.answer("Available commands:\n - /start\n - /help\n - /notes")
+    await message.answer("Команды:\n - /start\n - /help\n - /notes\n - /stop")
 
 
 @router.message(F.text == BaseButtons.stop)

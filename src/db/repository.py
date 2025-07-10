@@ -5,23 +5,23 @@ from db.models import Note
 from db.schemas import BaseNote
 
 
-async def get_all_notes() -> list[Note]:
+async def get_all_notes(user_id: int) -> list[Note]:
     async with SessionMaker() as session:
-        stmt = select(Note)
+        stmt = select(Note).where(Note.user_id == user_id)
         res = await session.scalars(stmt)
         return res.all()
 
 
-async def get_by_name(name: str) -> Note | None:
+async def get_by_name(name: str, user_id: int) -> Note | None:
     async with SessionMaker() as session:
-        stmt = select(Note).where(Note.name == name)
+        stmt = select(Note).where(Note.name == name, Note.user_id == user_id)
         res = await session.scalar(stmt)
         return res
 
 
-async def get_by_id(note_id: int) -> Note | None:
+async def get_by_id(note_id: int, user_id: int) -> Note | None:
     async with SessionMaker() as session:
-        stmt = select(Note).where(Note.id == note_id)
+        stmt = select(Note).where(Note.id == note_id, Note.user_id == user_id)
         res = await session.scalar(stmt)
         return res
 
@@ -45,8 +45,10 @@ async def delete_note(note: Note) -> None:
         await session.commit()
 
 
-async def search_by_prefix(prefix: str, limit: int = 10):
+async def search_by_prefix(prefix: str, user_id: int, limit: int = 10):
     async with SessionMaker() as session:
-        stmt = select(Note).where(Note.name.ilike(f"{prefix}%")).limit(limit)
+        stmt = (
+            select(Note).where(Note.name.ilike(f"{prefix}%"), Note.user_id == user_id).limit(limit)
+        )
         result = await session.execute(stmt)
         return result.scalars().all()
