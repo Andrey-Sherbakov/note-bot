@@ -3,13 +3,13 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.chat_action import ChatActionSender
-from aiogram.utils.markdown import hitalic, hbold
+from aiogram.utils.markdown import hitalic
 
 from db import repository
 from db.schemas import BaseNote
 from keyboards.reply import NotesButtons, StartButtons, get_notes_kb
 from service import notes as notes_service
-from states import AddNoteState, GetNoteState, UpdateNoteState, DeleteNoteState
+from states import AddNoteState, GetNoteState, UpdateNoteState, DeleteNoteState, RenameNoteState
 
 router = Router(name=__name__)
 
@@ -24,6 +24,7 @@ async def handle_notes(message: Message, state: FSMContext) -> None:
             " 1. Все заметки - /getall",
             " 2. Одна заметка - /get",
             " 3. Создать заметку - /add",
+            " 5. Переименовать заметку - /rename",
             " 4. Изменить заметку - /update",
             " 5. Удалить заметку - /delete",
             sep="\n",
@@ -120,55 +121,65 @@ async def update_note_state_text(message: Message, state: FSMContext) -> None:
     await notes_service.end_note_update(message=message, state=state)
 
 
+# rename note
+@router.message(F.text == NotesButtons.rename)
+@router.message(Command("rename"))
+async def rename_note(message: Message, state: FSMContext) -> None:
+    args = message.text.strip().split(" ")
+    if args[0].startswith("/") and len(args) == 2:
+        await notes_service.start_rename_note(name=args[1], message=message, state=state)
+    else:
+        await message.answer("Введите название:")
+        await state.set_state(RenameNoteState.name)
+
+
+@router.message(RenameNoteState.name)
+async def rename_note_state_name(message: Message, state: FSMContext) -> None:
+    name = message.text
+    if not name:
+        await message.answer("Введите название:")
+
+    await notes_service.start_rename_note(name=name, message=message, state=state)
+
+
+@router.message(RenameNoteState.new_name)
+async def rename_note_state_new_name(message: Message, state: FSMContext) -> None:
+    new_name = message.text
+    if not new_name:
+        await message.answer("Введите новое название:")
+
+    await notes_service.end_note_rename(new_name=new_name, message=message, state=state)
+
+
 # delete note
 @router.message(F.text == NotesButtons.delete)
 @router.message(Command("delete"))
 async def delete_note(message: Message, state: FSMContext) -> None:
-    await message.answer("Enter note name:")
-    await state.set_state(DeleteNoteState.name)
+    args = message.text.strip().split(" ")
+    if args[0].startswith("/") and len(args) == 2:
+        await notes_service.start_delete_note(name=args[1], message=message, state=state)
+    else:
+        await message.answer("Enter note name:")
+        await state.set_state(DeleteNoteState.name)
 
 
 @router.message(DeleteNoteState.name)
 async def delete_note_state_name(message: Message, state: FSMContext) -> None:
-    if not message.text:
+    name = message.text
+    if not name:
         await message.answer("Please enter name:")
         return
 
-    name = message.text.strip().lower()
-    note = await repository.get_by_name(name=name)
-    if note:
-        await state.update_data(note=note)
-        await message.answer(
-            f"Delete note: {hbold(note.name)}?\n" + hitalic("Y/Д - Yes/Да, N/Н - No/Нет")
-        )
-        await state.set_state(DeleteNoteState.confirmation)
-    else:
-        await message.answer("Note with that name does not exist.")
-        await state.clear()
+    await notes_service.start_delete_note(name=name, message=message, state=state)
 
 
 @router.message(DeleteNoteState.confirmation)
 async def delete_note_state_confirmation(message: Message, state: FSMContext) -> None:
     if not message.text:
-        await message.answer("Please enter valid symbol:" + hitalic("Y/Д - Yes/Да, N/Н - No/Нет"))
+        await message.answer("Please enter valid symbol:\n" + hitalic("Y/Д - Yes/Да, N/Н - No/Нет"))
         return
 
-    confirmation_map = {"yes": ["y", "д"], "no": ["n", "н"]}
-    text = message.text.strip().lower()
-
-    if text in confirmation_map["yes"]:
-        data = await state.get_data()
-
-        await repository.delete_note(note=data["note"])
-        await message.answer("Note deleted!")
-        await state.clear()
-
-    elif text in confirmation_map["no"]:
-        await message.answer("Note delete cancelled.")
-        await state.clear()
-
-    else:
-        await message.answer("Please enter valid symbol:" + hitalic("Y/Д - Yes/Да, N/Н - No/Нет"))
+    await notes_service.end_note_delete(message=message, state=state)
 
 
 # default handler

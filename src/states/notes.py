@@ -15,6 +15,11 @@ class UpdateNoteState(StatesGroup):
     text = State()
 
 
+class RenameNoteState(StatesGroup):
+    name = State()
+    new_name = State()
+
+
 class DeleteNoteState(StatesGroup):
     name = State()
     confirmation = State()
