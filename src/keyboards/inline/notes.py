@@ -17,18 +17,15 @@ class NoteInlineActions(enum.StrEnum):
 class NoteInlineCallbackData(CallbackData, prefix="note_actions"):
     action: NoteInlineActions
     note_id: int
-    note_name: str
 
 
-def get_note_inline_kb(note_id: int, note_name: str) -> InlineKeyboardMarkup:
+def get_note_inline_kb(note_id: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for action in NoteInlineActions:
         builder.button(
             text=action,
-            callback_data=NoteInlineCallbackData(
-                action=action, note_id=note_id, note_name=note_name
-            ).pack(),
+            callback_data=NoteInlineCallbackData(action=action, note_id=note_id).pack(),
         )
 
     builder.adjust(3)
@@ -63,18 +60,15 @@ class DeleteNoteInlineActions(enum.StrEnum):
 class DeleteNoteCallbackData(CallbackData, prefix="delete_confirmation"):
     action: DeleteNoteInlineActions
     note_id: int
-    note_name: str
 
 
-def get_delete_note_inline_kb(note_id: int, note_name: str) -> InlineKeyboardMarkup:
+def get_delete_note_inline_kb(note_id: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for action in DeleteNoteInlineActions:
         builder.button(
             text=action,
-            callback_data=DeleteNoteCallbackData(
-                action=action, note_id=note_id, note_name=note_name
-            ).pack(),
+            callback_data=DeleteNoteCallbackData(action=action, note_id=note_id).pack(),
         )
 
     return builder.as_markup()
