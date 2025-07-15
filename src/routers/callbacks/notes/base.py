@@ -3,15 +3,13 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import (
     CallbackQuery,
 )
-from aiogram.utils.markdown import hbold
 
-from db import repository
 from keyboards.inline import (
     AllNotesInlineCallbackData,
     DeleteNoteCallbackData,
     DeleteNoteInlineActions,
 )
-from service import notes as notes_service
+from service import notes_service
 
 router = Router(name=__name__)
 
@@ -21,7 +19,7 @@ router = Router(name=__name__)
 async def all_notes_callback(
     callback: CallbackQuery, callback_data: AllNotesInlineCallbackData, state: FSMContext
 ):
-    await notes_service.start_get_note(
+    await notes_service.get_note_state_name(
         callback_data.note_name,
         user_id=callback.from_user.id,
         message=callback.message,
@@ -35,14 +33,10 @@ async def all_notes_callback(
 async def delete_note_confirmed_callback(
     callback: CallbackQuery, callback_data: DeleteNoteCallbackData, state: FSMContext
 ):
-    note = await repository.get_by_id(callback_data.note_id, user_id=callback.from_user.id)
-    if note is None:
-        await callback.message.answer(
-            f"Заметка '{hbold(callback_data.note_name.capitalize())}' уже удалена"
-        )
-    else:
-        await repository.delete_note(note)
-        await callback.message.answer("Заметка успешно удалена!")
+    answer = await notes_service.delete_note_state_confirmed(
+        note_id=callback_data.note_id, user_id=callback.from_user.id
+    )
+    await callback.message.answer(answer)
     await callback.answer()
     await state.clear()
 

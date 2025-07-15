@@ -8,7 +8,7 @@ from keyboards.reply.base import BaseButtons
 
 class NotesButtons(enum.StrEnum):
     all = "Все"
-    one = "Одна"
+    get = "Одна"
     add = "Добавить"
     rename = "Переименовать"
     update = "Изменить"

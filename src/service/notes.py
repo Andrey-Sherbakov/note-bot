@@ -5,21 +5,18 @@ from aiogram.types import Message
 from aiogram.utils.markdown import hbold, hitalic
 
 from db import repository
-from db.models import Note
 from db.schemas import BaseNote
 from keyboards.inline import get_note_inline_kb, get_delete_note_inline_kb
 from states import UpdateNoteState, RenameNoteState, DeleteNoteState, AddNoteState
 
 
-async def validate_name(name: str, user_id: int) -> Note | None:
-    name = name.strip().lower()
-    note = await repository.get_by_name(name=name, user_id=user_id)
-    return note
+def normalize_name(name: str) -> str:
+    return name.strip().lower()
 
 
 # get note
-async def start_get_note(name: str, user_id: int, message: Message, state: FSMContext) -> None:
-    note = await validate_name(name, user_id)
+async def get_note_state_name(name: str, user_id: int, message: Message, state: FSMContext) -> None:
+    note = await repository.get_by_name(name=normalize_name(name), user_id=user_id)
 
     if note:
         await message.answer(f"{hbold(note.name.capitalize())}:")
@@ -34,19 +31,20 @@ async def start_get_note(name: str, user_id: int, message: Message, state: FSMCo
 
 
 # add note
-async def start_add_note(name: str, message: Message, state: FSMContext) -> None:
-    note = await validate_name(name, message.from_user.id)
+async def add_note_state_name(name: str, message: Message, state: FSMContext) -> None:
+    name = normalize_name(name)
+    note = await repository.get_by_name(name=name, user_id=message.from_user.id)
 
     if note:
         await message.answer("Заметка с таким названием уже существует.\nВведите другое:")
         return
 
-    await state.update_data(note_name=name.strip().lower())
+    await state.update_data(note_name=name)
     await message.answer("Текст заметки:")
     await state.set_state(AddNoteState.text)
 
 
-async def end_add_note(message: Message, state: FSMContext) -> None:
+async def add_note_state_text(message: Message, state: FSMContext) -> None:
     try:
         new_note = BaseNote(
             name=(await state.get_data()).get("note_name"),
@@ -61,8 +59,8 @@ async def end_add_note(message: Message, state: FSMContext) -> None:
 
 
 # update note
-async def start_note_update(name: str, message: Message, state: FSMContext) -> None:
-    note = await validate_name(name, message.from_user.id)
+async def update_note_state_name(name: str, message: Message, state: FSMContext) -> None:
+    note = await repository.get_by_name(name=normalize_name(name), user_id=message.from_user.id)
 
     if note:
         await message.answer(f"Изменение заметки - {hbold(note.name.capitalize())}:")
@@ -73,7 +71,7 @@ async def start_note_update(name: str, message: Message, state: FSMContext) -> N
         await state.clear()
 
 
-async def end_note_update(message: Message, state: FSMContext) -> None:
+async def update_note_state_text(message: Message, state: FSMContext) -> None:
     data = await state.get_data()
     note_id = data["note_id"]
     note = await repository.get_by_id(note_id=note_id, user_id=message.from_user.id)
@@ -85,8 +83,8 @@ async def end_note_update(message: Message, state: FSMContext) -> None:
 
 
 # rename note
-async def start_rename_note(name: str, message: Message, state: FSMContext) -> None:
-    note = await validate_name(name, message.from_user.id)
+async def rename_note_state_name(name: str, message: Message, state: FSMContext) -> None:
+    note = await repository.get_by_name(name=normalize_name(name), user_id=message.from_user.id)
 
     if note:
         await message.answer(f"Изменение названия заметки - {hbold(note.name.capitalize())}:")
@@ -97,8 +95,8 @@ async def start_rename_note(name: str, message: Message, state: FSMContext) -> N
         await state.clear()
 
 
-async def end_note_rename(new_name: str, message: Message, state: FSMContext) -> None:
-    note = await validate_name(new_name, message.from_user.id)
+async def rename_note_state_new_name(new_name: str, message: Message, state: FSMContext) -> None:
+    note = await repository.get_by_name(name=normalize_name(name), user_id=user_id)
 
     if note:
         await message.answer(
@@ -117,8 +115,8 @@ async def end_note_rename(new_name: str, message: Message, state: FSMContext) ->
 
 
 # delete note
-async def start_delete_note(name: str, message: Message, state: FSMContext) -> None:
-    note = await validate_name(name, message.from_user.id)
+async def delete_note_state_name(name: str, message: Message, state: FSMContext) -> None:
+    note = await repository.get_by_name(name=normalize_name(name), user_id=message.from_user.id)
 
     if note:
         await state.update_data(note_id=note.id)
@@ -132,23 +130,11 @@ async def start_delete_note(name: str, message: Message, state: FSMContext) -> N
         await state.clear()
 
 
-async def end_note_delete(message: Message, state: FSMContext) -> None:
-    confirmation_map = {"yes": ["y", "д"], "no": ["n", "н"]}
-    text = message.text.strip().lower()
-
-    if text in confirmation_map["yes"]:
-        data = await state.get_data()
-
-        note = await repository.get_by_id(note_id=data["note_id"], user_id=message.from_user.id)
-        await repository.delete_note(note)
-        await message.answer(f"Заметка '{hbold(note.name.capitalize())}' успешно удалена!")
-        await state.clear()
-
-    elif text in confirmation_map["no"]:
-        await message.answer("Удаление заметки отменено")
-        await state.clear()
-
+async def delete_note_state_confirmed(note_id: int, user_id: int) -> str:
+    note = await repository.get_by_id(note_id, user_id=user_id)
+    if note is None:
+        answer = "Заметка уже удалена"
     else:
-        await message.answer(
-            "Пожалуйста введите правильный символ:\n" + hitalic("Y/Д - Да, N/Н - Нет")
-        )
+        await repository.delete_note(note)
+        answer = "Заметка успешно удалена!"
+    return answer

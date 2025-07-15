@@ -8,7 +8,7 @@ from aiogram.utils.markdown import hitalic
 from db import repository
 from keyboards.inline import get_all_notes_inline_kb
 from keyboards.reply import NotesButtons, StartButtons, get_notes_kb
-from service import notes as notes_service
+from service import notes_service, CommandsFilter
 
 router = Router(name=__name__)
 
@@ -34,8 +34,7 @@ async def handle_notes(message: Message, state: FSMContext) -> None:
 
 
 # get all notes
-@router.message(F.text == NotesButtons.all)
-@router.message(Command("all"))
+@router.message(CommandsFilter(["/all", NotesButtons.all]))
 async def get_all_notes(message: Message, state: FSMContext) -> None:
     await state.clear()
     async with ChatActionSender.typing(chat_id=message.chat.id, bot=message.bot):
@@ -51,9 +50,10 @@ async def get_all_notes(message: Message, state: FSMContext) -> None:
 # default handler
 @router.message()
 async def default_message(message: Message, state: FSMContext) -> None:
+    print("Standard handler")
     if not message.text:
         await message.answer(hitalic("Доступные действия: /help"))
 
-    await notes_service.start_get_note(
+    await notes_service.get_note_state_name(
         name=message.text, user_id=message.from_user.id, message=message, state=state
     )
