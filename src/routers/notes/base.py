@@ -43,7 +43,7 @@ async def get_all_notes(message: Message, state: FSMContext) -> None:
             await message.answer("Заметок пока нет.")
             return
 
-        text = "\n\n".join(f"<b>{note.name}</b>: {note.text}" for note in all_notes)
+        text = "\n\n".join(f"<b>{note.name.capitalize()}</b>:\n{note.text}" for note in all_notes)
         await message.answer(text, reply_markup=get_all_notes_inline_kb(all_notes))
 
 

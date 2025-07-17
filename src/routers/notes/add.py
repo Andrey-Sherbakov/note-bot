@@ -28,7 +28,7 @@ async def add_note_state_name(message: Message, state: FSMContext) -> None:
 
 
 @router.message(AddNoteState.name)
-async def add_note_state_name(message: Message) -> None:
+async def add_note_state_name_fail(message: Message) -> None:
     await message.answer("Пожалуйста, введите название заметки:")
 
 
@@ -39,5 +39,5 @@ async def add_note_state_text(message: Message, state: FSMContext) -> None:
 
 
 @router.message(AddNoteState.text)
-async def add_note_state_text(message: Message) -> None:
+async def add_note_state_text_fail(message: Message) -> None:
     await message.answer("Пожалуйста, введите текст заметки:")

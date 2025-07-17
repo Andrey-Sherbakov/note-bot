@@ -48,7 +48,7 @@ async def add_note_state_text(message: Message, state: FSMContext) -> None:
     try:
         new_note = BaseNote(
             name=(await state.get_data()).get("note_name"),
-            text=message.text.strip(),
+            text=message.html_text.strip(),
             user_id=message.from_user.id,
         )
         await repository.create_note(new_note=new_note)
@@ -75,7 +75,7 @@ async def update_note_state_text(message: Message, state: FSMContext) -> None:
     data = await state.get_data()
     note_id = data["note_id"]
     note = await repository.get_by_id(note_id=note_id, user_id=message.from_user.id)
-    note.text = message.text.strip()
+    note.text = message.html_text.strip()
 
     await repository.update_note(note)
     await message.answer("Заметка успешно обновлена!")
@@ -96,7 +96,7 @@ async def rename_note_state_name(name: str, message: Message, state: FSMContext)
 
 
 async def rename_note_state_new_name(new_name: str, message: Message, state: FSMContext) -> None:
-    note = await repository.get_by_name(name=normalize_name(name), user_id=user_id)
+    note = await repository.get_by_name(name=normalize_name(new_name), user_id=message.from_user.id)
 
     if note:
         await message.answer(
