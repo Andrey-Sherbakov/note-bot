@@ -32,7 +32,7 @@ async def all_notes_paginate(
     page = callback_data.page
     user_id = callback.from_user.id
 
-    notes, total_pages = await sErvice.get_notes_paginated(page=page, user_id=user_id)  # noqa: F821
+    notes, total_pages = await service.get_notes_paginated(page=page, user_id=user_id)
     if not notes:
         await callback.answer("Заметки не найдены")
         return
