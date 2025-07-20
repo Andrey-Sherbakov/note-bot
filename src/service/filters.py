@@ -1,13 +1,19 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
+from config import settings
+
 
 class CommandsFilter(BaseFilter):
-    def __init__(self, commands: list[str], require_arg: bool = False):
+    def __init__(self, *commands: str, require_arg: bool = False, admin: bool = False):
         self.commands = [cmd.lower() for cmd in commands]
         self.require_arg = require_arg
+        self.admin = admin
 
     async def __call__(self, message: Message) -> bool | dict[str, str]:
+        if self.admin and message.from_user.id != settings.ADMIN:
+            return False
+
         text = message.text
         if not text:
             return False

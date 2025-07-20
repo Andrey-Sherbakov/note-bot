@@ -11,8 +11,8 @@ down: ## Stop and remove Docker containers
 
 restart: ## Restart Docker containers
 	@echo "Restarting Docker containers..."
-	docker compose down
 	git pull
+	docker compose down
 	docker compose up --build -d
 
 logs: ## Show logs for Docker containers

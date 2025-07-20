@@ -33,16 +33,11 @@ async def handle_notes(message: Message, state: FSMContext) -> None:
 
 
 # get all notes
-@router.message(CommandsFilter(["/all", NotesButtons.all]))
+@router.message(CommandsFilter("/all", NotesButtons.all))
 async def get_all_notes(message: Message, state: FSMContext) -> None:
     await state.clear()
 
     async with ChatActionSender.typing(chat_id=message.chat.id, bot=message.bot):
-        # all_notes = await repository.get_all_notes(user_id=message.from_user.id)
-        # if not all_notes:
-        #     await message.answer("Заметок пока нет.")
-        #     return
-
         user_id = message.from_user.id
         page = 1
 

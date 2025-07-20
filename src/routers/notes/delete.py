@@ -12,12 +12,12 @@ router = Router(name=__name__)
 
 
 # initial command
-@router.message(CommandsFilter(["/delete", NotesButtons.delete], require_arg=True))
+@router.message(CommandsFilter("/delete", NotesButtons.delete, require_arg=True))
 async def delete_note_with_name(message: Message, state: FSMContext, arg: str):
     await notes_service.delete_note_state_name(name=arg, message=message, state=state)
 
 
-@router.message(CommandsFilter(["/delete", NotesButtons.delete]))
+@router.message(CommandsFilter("/delete", NotesButtons.delete))
 async def delete_note(message: Message, state: FSMContext) -> None:
     await message.answer("Название заметки:")
     await state.set_state(DeleteNoteState.name)

@@ -10,12 +10,12 @@ router = Router(name=__name__)
 
 
 # initial command
-@router.message(CommandsFilter(["/rename", NotesButtons.rename], require_arg=True))
+@router.message(CommandsFilter("/rename", NotesButtons.rename, require_arg=True))
 async def rename_note_with_name(message: Message, state: FSMContext, arg: str) -> None:
     await notes_service.rename_note_state_name(name=arg, message=message, state=state)
 
 
-@router.message(CommandsFilter(["/rename", NotesButtons.rename]))
+@router.message(CommandsFilter("/rename", NotesButtons.rename))
 async def rename_note(message: Message, state: FSMContext) -> None:
     await message.answer("Введите название:")
     await state.set_state(RenameNoteState.name)
@@ -28,7 +28,7 @@ async def rename_note_state_name(message: Message, state: FSMContext) -> None:
 
 
 @router.message(RenameNoteState.name)
-async def rename_note_state_name(message: Message) -> None:
+async def rename_note_state_name_fail(message: Message) -> None:
     await message.answer("Пожалуйста, введите название заметки:")
 
 
@@ -41,6 +41,6 @@ async def rename_note_state_new_name(message: Message, state: FSMContext) -> Non
 
 
 @router.message(RenameNoteState.new_name)
-async def rename_note_state_new_name(message: Message) -> None:
+async def rename_note_state_new_name_fail(message: Message) -> None:
     await message.answer("Пожалуйста, введите новое название заметки:")
 

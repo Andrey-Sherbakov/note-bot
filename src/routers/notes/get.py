@@ -10,14 +10,14 @@ router = Router(name=__name__)
 
 
 # initial command
-@router.message(CommandsFilter(["/get", NotesButtons.get], require_arg=True))
+@router.message(CommandsFilter("/get", NotesButtons.get, require_arg=True))
 async def get_note_with_name(message: Message, state: FSMContext, arg: str) -> None:
     await notes_service.get_note_state_name(
         name=arg, user_id=message.from_user.id, message=message, state=state
     )
 
 
-@router.message(CommandsFilter(["/get", NotesButtons.get]))
+@router.message(CommandsFilter("/get", NotesButtons.get))
 async def get_note(message: Message, state: FSMContext) -> None:
     await message.answer("Название заметки:")
     await state.set_state(GetNoteState.name)
@@ -32,5 +32,5 @@ async def get_note_state_name(message: Message, state: FSMContext) -> None:
 
 
 @router.message(GetNoteState.name)
-async def get_note_state_name(message: Message) -> None:
+async def get_note_state_name_fail(message: Message) -> None:
     await message.answer("Пожалуйста, введите название заметки:")

@@ -10,14 +10,14 @@ router = Router(name=__name__)
 
 
 # initial command
-@router.message(CommandsFilter(["/add", NotesButtons.add], require_arg=True))
+@router.message(CommandsFilter("/add", NotesButtons.add, require_arg=True))
 async def add_note_with_name(message: Message, state: FSMContext, arg: str) -> None:
     await notes_service.add_note_state_name(
         name=arg, user_id=message.from_user.id, message=message, state=state
     )
 
 
-@router.message(CommandsFilter(["/add", NotesButtons.add]))
+@router.message(CommandsFilter("/add", NotesButtons.add))
 async def add_note(message: Message, state: FSMContext) -> None:
     await message.answer("Название заметки:")
     await state.set_state(AddNoteState.name)

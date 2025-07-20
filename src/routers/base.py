@@ -3,7 +3,6 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
-from config import settings
 from keyboards.reply import BaseButtons, get_start_kb, StartButtons
 
 router = Router(name=__name__)
@@ -37,16 +36,6 @@ async def handle_stop(message: Message, state: FSMContext) -> None:
     await state.clear()
 
 
-@router.message(F.text == BaseButtons.restart)
-@router.message(Command("restart"))
-async def handle_restart(message: Message) -> None:
-    if message.from_user.id != settings.ADMIN:
-        await message.answer("У вас нет прав на это действие")
-        return
 
-    await message.answer("Перезапускаю контейнеры")
-
-    with open("/tmp/bot_pipe", "w") as pipe:
-        pipe.write("make -C /root/note-bot restart\n")
 
 

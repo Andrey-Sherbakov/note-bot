@@ -1,4 +1,5 @@
 import enum
+from typing import Iterable
 
 from aiogram.types import ReplyKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
@@ -7,21 +8,23 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 class BaseButtons(enum.StrEnum):
     start = "Старт"
     stop = "Конец"
-    restart = "Перезапуск"
 
 
 class StartButtons(enum.StrEnum):
     help = "Помощь"
     notes = "Заметки"
-    restart = BaseButtons.restart
     stop = BaseButtons.stop
 
 
-def get_start_kb() -> ReplyKeyboardMarkup:
+def get_reply_kb(seq: Iterable[str], adjust: int = 3) -> ReplyKeyboardMarkup:
     builder = ReplyKeyboardBuilder()
 
-    for button in StartButtons:
+    for button in seq:
         builder.button(text=button)
 
-    builder.adjust(2)
+    builder.adjust(adjust)
     return builder.as_markup(resize_keyboard=True)
+
+
+def get_start_kb() -> ReplyKeyboardMarkup:
+    return get_reply_kb(StartButtons, adjust=2)
