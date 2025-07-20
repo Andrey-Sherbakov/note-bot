@@ -13,6 +13,7 @@ class BaseButtons(enum.StrEnum):
 class StartButtons(enum.StrEnum):
     help = "Помощь"
     notes = "Заметки"
+    restart = BaseButtons.restart
     stop = BaseButtons.stop
 
 
@@ -22,5 +23,5 @@ def get_start_kb() -> ReplyKeyboardMarkup:
     for button in StartButtons:
         builder.button(text=button)
 
-    builder.adjust(2, 1)
+    builder.adjust(2)
     return builder.as_markup(resize_keyboard=True)
