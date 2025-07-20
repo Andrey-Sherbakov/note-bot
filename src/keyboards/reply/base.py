@@ -7,6 +7,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 class BaseButtons(enum.StrEnum):
     start = "Старт"
     stop = "Конец"
+    restart = "Перезапуск"
 
 
 class StartButtons(enum.StrEnum):

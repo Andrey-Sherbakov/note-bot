@@ -4,6 +4,8 @@ services:
     container_name: note-bot
     restart: always
     command: [ "uv", "run", "python", "src/main.py" ]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8002:8000"
     networks:

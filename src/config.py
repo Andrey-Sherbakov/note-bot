@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     BOT_TOKEN: str
-    BOT_NAME: str
+    ADMIN: int
 
     DB_USER: str
     DB_PASS: str
