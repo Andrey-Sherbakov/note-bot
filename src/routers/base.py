@@ -1,4 +1,3 @@
-
 from aiogram import F, Router
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
@@ -48,6 +47,6 @@ async def handle_restart(message: Message) -> None:
     await message.answer("Перезапускаю контейнеры")
 
     with open("/tmp/bot_pipe", "w") as pipe:
-        pipe.write("make restart\n")
+        pipe.write("make -C /note-bot restart\n")
 
 
