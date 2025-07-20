@@ -10,7 +10,7 @@ class AdminActions(enum.StrEnum):
     note_bot = "Note-Bot"
     pomodoro = "Pomodoro"
     notification_service = "Notification-Service"
-    logs = "Pipe Логи"
+    logs = "Pipe-Логи"
     admin = BaseButtons.admin
     stop = BaseButtons.stop
 
