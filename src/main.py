@@ -15,6 +15,7 @@ logging.basicConfig(level=logging.INFO)
 async def main() -> None:
     dp = Dispatcher(storage=MemoryStorage())
     bot = Bot(token=settings.BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    await bot.send_message(chat_id=settings.ADMIN, text="Бот запущен.")
 
     dp.include_router(main_router)
 
