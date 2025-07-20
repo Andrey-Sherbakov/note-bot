@@ -28,7 +28,7 @@ async def handle_restart(message: Message) -> None:
     await message.answer("Перезапускаю контейнеры для Notification-Service")
 
     with open("/tmp/bot_pipe", "w") as pipe:
-        pipe.write("make -C /root/mail_service restart\n")
+        pipe.write("make -C /root/mail-service restart\n")
 
 
 @router.message(CommandsFilter(NotificationServiceActions.down, admin=True))
@@ -36,7 +36,7 @@ async def handle_down(message: Message) -> None:
     await message.answer("Выключаю контейнеры для Notification-Service")
 
     with open("/tmp/bot_pipe", "w") as pipe:
-        pipe.write("make -C /root/mail_service down\n")
+        pipe.write("make -C /root/mail-service down\n")
 
 
 @router.message(CommandsFilter(NotificationServiceActions.up, admin=True))
@@ -44,4 +44,4 @@ async def handle_up(message: Message) -> None:
     await message.answer("Запускаю контейнеры для Notification-Service")
 
     with open("/tmp/bot_pipe", "w") as pipe:
-        pipe.write("make -C /root/mail_service up\n")
+        pipe.write("make -C /root/mail-service up\n")
