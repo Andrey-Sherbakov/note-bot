@@ -34,7 +34,9 @@ async def handle_logs(message: Message) -> None:
         with open(file_path, "r", encoding="utf-8") as f:
             logs = f.read().strip()
             await message.answer(
-                text=f"Последние логи из `pipelogs.txt`:\n\n{html.escape(logs, quote=False)}"
+                text=f"Последние логи из `pipelogs.txt`:\n\n{html.escape(logs, quote=False)}"[
+                    -4096 + 41 :
+                ]
             )
 
 

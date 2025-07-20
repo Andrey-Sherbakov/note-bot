@@ -10,8 +10,8 @@ class AdminActions(enum.StrEnum):
     note_bot = "Note-Bot"
     pomodoro = "Pomodoro"
     notification_service = "Notification-Service"
-    logs = "Pipe-Логи"
     admin = BaseButtons.admin
+    logs = "Pipe-Логи"
     stop = BaseButtons.stop
 
 
@@ -23,7 +23,7 @@ class AdminCommands(enum.StrEnum):
 
 
 def get_admin_kb() -> ReplyKeyboardMarkup:
-    return get_reply_kb(AdminActions, adjust=(1, 1, 1, 2))
+    return get_reply_kb(AdminActions, adjust=(1, 1, 1, 3))
 
 
 # Note Bot
