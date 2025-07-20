@@ -33,11 +33,8 @@ async def handle_logs(message: Message) -> None:
     else:
         with open(file_path, "r", encoding="utf-8") as f:
             logs = f.read().strip()
-            await message.answer(
-                text=f"Последние логи из `pipelogs.txt`:\n\n{html.escape(logs, quote=False)}"[
-                    -4096 + 41 :
-                ]
-            )
+            text = f"Последние логи из `pipelogs.txt`:\n\n{html.escape(logs, quote=False)}"
+            await message.answer(text=text[-4096 + 41 :])
 
 
 @router.message(
