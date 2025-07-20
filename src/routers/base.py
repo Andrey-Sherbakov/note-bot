@@ -1,5 +1,3 @@
-import html
-import subprocess
 
 from aiogram import F, Router
 from aiogram.filters import Command, CommandStart
@@ -49,15 +47,7 @@ async def handle_restart(message: Message) -> None:
 
     await message.answer("Перезапускаю контейнеры")
 
-    try:
-        result = subprocess.run(
-            ["make", "restart"],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        await message.answer(f"Успешно: \n{html.escape(result.stdout.strip(), quote=False)}")
-    except subprocess.CalledProcessError as e:
-        await message.answer(f"Ошибка: \n{html.escape(e.stderr.strip(), quote=False)}")
+    with open("/tmp/bot_pipe", "w") as pipe:
+        pipe.write("make restart\n")
 
 

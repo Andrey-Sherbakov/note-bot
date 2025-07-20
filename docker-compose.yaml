@@ -5,7 +5,7 @@ services:
     restart: always
     command: [ "uv", "run", "python", "src/main.py" ]
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/bot_pipe:/tmp/bot_pipe
     ports:
       - "8002:8000"
     networks:
