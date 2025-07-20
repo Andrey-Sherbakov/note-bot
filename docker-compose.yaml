@@ -6,6 +6,7 @@ services:
     command: [ "uv", "run", "python", "src/main.py" ]
     volumes:
       - /tmp/bot_pipe:/tmp/bot_pipe
+      - ../logs:/logs
     ports:
       - "8002:8000"
     networks:
