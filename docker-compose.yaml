@@ -3,7 +3,7 @@ services:
     build: .
     container_name: note-bot
     restart: always
-    command: [ "uv", "run", "python", "src/main.py" ]
+    command: [ "uv", "run", "python", "-m", "src.main" ]
     volumes:
       - /tmp/bot_pipe:/tmp/bot_pipe
       - ../logs:/logs

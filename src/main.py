@@ -6,8 +6,8 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from config import settings
-from routers import router as main_router
+from src import router as main_router
+from src.core.config import settings
 
 logging.basicConfig(level=logging.INFO)
 
