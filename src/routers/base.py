@@ -47,6 +47,6 @@ async def handle_restart(message: Message) -> None:
     await message.answer("Перезапускаю контейнеры")
 
     with open("/tmp/bot_pipe", "w") as pipe:
-        pipe.write("make -C /note-bot restart\n")
+        pipe.write("make -C /root/note-bot restart\n")
 
 
