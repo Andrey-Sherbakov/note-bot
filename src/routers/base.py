@@ -50,12 +50,13 @@ async def handle_restart(message: Message) -> None:
     await message.answer("Перезапускаю контейнеры")
 
     try:
-        subprocess.run(
+        result = subprocess.run(
             ["make", "restart"],
             check=True,
             capture_output=True,
             text=True,
         )
+        await message.answer(f"Успешно: \n{html.escape(result.stdout.strip(), quote=False)}")
     except subprocess.CalledProcessError as e:
         await message.answer(f"Ошибка: \n{html.escape(e.stderr.strip(), quote=False)}")
 
