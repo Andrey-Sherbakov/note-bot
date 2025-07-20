@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, func, desc
 
 from db.base import SessionMaker
 from db.models import Note
@@ -7,7 +7,7 @@ from db.schemas import BaseNote
 
 async def get_all_notes(user_id: int) -> list[Note]:
     async with SessionMaker() as session:
-        stmt = select(Note).where(Note.user_id == user_id)
+        stmt = select(Note).where(Note.user_id == user_id).order_by(desc(Note.updated_at))
         res = await session.scalars(stmt)
         return res.all()
 
@@ -45,10 +45,33 @@ async def delete_note(note: Note) -> None:
         await session.commit()
 
 
-async def search_by_prefix(prefix: str, user_id: int, limit: int = 10):
+async def search_by_prefix(prefix: str, user_id: int, limit: int = 10) -> list[Note]:
     async with SessionMaker() as session:
         stmt = (
-            select(Note).where(Note.name.ilike(f"{prefix}%"), Note.user_id == user_id).limit(limit)
+            select(Note)
+            .where(Note.name.ilike(f"{prefix}%"), Note.user_id == user_id)
+            .order_by(desc(Note.updated_at))
+            .limit(limit)
         )
-        result = await session.execute(stmt)
-        return result.scalars().all()
+        res = await session.execute(stmt)
+        return res.scalars().all()
+
+
+async def count_notes(user_id: int) -> int:
+    async with SessionMaker() as session:
+        stmt = select(func.count()).select_from(Note).where(Note.user_id == user_id)
+        res = await session.scalar(stmt)
+        return res
+
+
+async def get_notes_pagination(user_id: int, limit: int, offset: int) -> list[Note]:
+    async with SessionMaker() as session:
+        stmt = (
+            select(Note)
+            .where(Note.user_id == user_id)
+            .order_by(desc(Note.updated_at))
+            .offset(offset)
+            .limit(limit)
+        )
+        res = await session.scalars(stmt)
+        return res.all()

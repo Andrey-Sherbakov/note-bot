@@ -5,22 +5,22 @@ from aiogram.types import (
 )
 
 from keyboards.inline import (
-    AllNotesInlineCallbackData,
     DeleteNoteCallbackData,
     DeleteNoteInlineActions,
+    AddNoteCallbackData,
 )
 from service import notes_service
 
 router = Router(name=__name__)
 
 
-# get all notes callbacks
-@router.callback_query(AllNotesInlineCallbackData.filter())
-async def all_notes_callback(
-    callback: CallbackQuery, callback_data: AllNotesInlineCallbackData, state: FSMContext
+# add note callback
+@router.callback_query(AddNoteCallbackData.filter())
+async def add_note_callback(
+    callback: CallbackQuery, callback_data: AddNoteCallbackData, state: FSMContext
 ):
-    await notes_service.get_note_state_name(
-        callback_data.note_name,
+    await notes_service.add_note_state_name(
+        name=callback_data.name,
         user_id=callback.from_user.id,
         message=callback.message,
         state=state,

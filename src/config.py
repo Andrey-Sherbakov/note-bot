@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     DB_PORT: str
     DB_NAME: str
 
+    PAGE_SIZE: int
+
     @property
     def DATABASE_URL(self) -> str:
         return (

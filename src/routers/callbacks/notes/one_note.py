@@ -16,6 +16,7 @@ async def note_update_callback(
     await callback.message.answer("Изменение заметки:")
     await state.update_data(note_id=callback_data.note_id)
     await state.set_state(UpdateNoteState.text)
+    await callback.answer()
 
 
 @router.callback_query(NoteInlineCallbackData.filter(F.action == NoteInlineActions.rename))
@@ -25,6 +26,7 @@ async def note_rename_callback(
     await callback.message.answer("Изменение названия заметки:")
     await state.update_data(note_id=callback_data.note_id)
     await state.set_state(RenameNoteState.new_name)
+    await callback.answer()
 
 
 @router.callback_query(NoteInlineCallbackData.filter(F.action == NoteInlineActions.delete))
@@ -37,3 +39,4 @@ async def note_delete_callback(
     )
     await state.update_data(note_id=callback_data.note_id)
     await state.set_state(DeleteNoteState.confirmation)
+    await callback.answer()

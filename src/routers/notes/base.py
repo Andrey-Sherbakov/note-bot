@@ -5,8 +5,7 @@ from aiogram.types import Message
 from aiogram.utils.chat_action import ChatActionSender
 from aiogram.utils.markdown import hitalic
 
-from db import repository
-from keyboards.inline import get_all_notes_inline_kb
+from keyboards.inline import get_notes_pagination_kb
 from keyboards.reply import NotesButtons, StartButtons, get_notes_kb
 from service import notes_service, CommandsFilter
 
@@ -37,14 +36,27 @@ async def handle_notes(message: Message, state: FSMContext) -> None:
 @router.message(CommandsFilter(["/all", NotesButtons.all]))
 async def get_all_notes(message: Message, state: FSMContext) -> None:
     await state.clear()
+
     async with ChatActionSender.typing(chat_id=message.chat.id, bot=message.bot):
-        all_notes = await repository.get_all_notes(user_id=message.from_user.id)
-        if not all_notes:
+        # all_notes = await repository.get_all_notes(user_id=message.from_user.id)
+        # if not all_notes:
+        #     await message.answer("Заметок пока нет.")
+        #     return
+
+        user_id = message.from_user.id
+        page = 1
+
+        notes, total_pages = await notes_service.get_notes_paginated(user_id, page)
+        if not notes:
             await message.answer("Заметок пока нет.")
             return
 
-        text = "\n\n".join(f"<b>{note.name.capitalize()}</b>:\n{note.text}" for note in all_notes)
-        await message.answer(text, reply_markup=get_all_notes_inline_kb(all_notes))
+        text = "\n\n".join(f"<b>{note.name.capitalize()}</b>:\n{note.text}" for note in notes)
+        if page < total_pages:
+            text += "\n\n..."
+
+        kb = get_notes_pagination_kb(notes=notes, page=page, total_pages=total_pages)
+        await message.answer(text, reply_markup=kb)
 
 
 # default handler

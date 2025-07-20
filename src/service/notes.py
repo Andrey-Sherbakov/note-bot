@@ -4,9 +4,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.markdown import hbold, hitalic
 
+from config import settings
 from db import repository
+from db.models import Note
 from db.schemas import BaseNote
-from keyboards.inline import get_note_inline_kb, get_delete_note_inline_kb
+from keyboards.inline import get_note_inline_kb, get_delete_note_inline_kb, get_similar_notes_kb
 from states import UpdateNoteState, RenameNoteState, DeleteNoteState, AddNoteState
 
 
@@ -16,7 +18,8 @@ def normalize_name(name: str) -> str:
 
 # get note
 async def get_note_state_name(name: str, user_id: int, message: Message, state: FSMContext) -> None:
-    note = await repository.get_by_name(name=normalize_name(name), user_id=user_id)
+    name = normalize_name(name)
+    note = await repository.get_by_name(name=name, user_id=user_id)
 
     if note:
         await message.answer(f"{hbold(note.name.capitalize())}:")
@@ -25,15 +28,23 @@ async def get_note_state_name(name: str, user_id: int, message: Message, state: 
             reply_markup=get_note_inline_kb(note.id),
         )
     else:
-        await message.answer("Заметки с таким именем не существует.")
+        similar_notes = await repository.search_by_prefix(prefix=name, user_id=user_id)
+        if similar_notes:
+            text = hitalic("Заметка не найдена. Возможно, вы имели в виду:\n")
+            text += "\n".join(f"• {n.name.capitalize()}" for n in similar_notes)
+        else:
+            text = hitalic("Заметки с таким именем не существует.")
+
+        kb = get_similar_notes_kb(notes=similar_notes, name=name)
+        await message.answer(text, reply_markup=kb)
 
     await state.clear()
 
 
 # add note
-async def add_note_state_name(name: str, message: Message, state: FSMContext) -> None:
+async def add_note_state_name(name: str, user_id: int, message: Message, state: FSMContext) -> None:
     name = normalize_name(name)
-    note = await repository.get_by_name(name=name, user_id=message.from_user.id)
+    note = await repository.get_by_name(name=name, user_id=user_id)
 
     if note:
         await message.answer("Заметка с таким названием уже существует.\nВведите другое:")
@@ -138,3 +149,14 @@ async def delete_note_state_confirmed(note_id: int, user_id: int) -> str:
         await repository.delete_note(note)
         answer = "Заметка успешно удалена!"
     return answer
+
+
+# all notes pagination
+async def get_notes_paginated(user_id: int, page: int = 1) -> tuple[list[Note], int]:
+    offset = (page - 1) * settings.PAGE_SIZE
+    total_count = await repository.count_notes(user_id=user_id)
+    notes = await repository.get_notes_pagination(
+        user_id=user_id, offset=offset, limit=settings.PAGE_SIZE
+    )
+    total_pages = (total_count + settings.PAGE_SIZE - 1) // settings.PAGE_SIZE
+    return notes, total_pages
