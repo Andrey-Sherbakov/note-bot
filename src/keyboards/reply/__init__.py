@@ -6,6 +6,8 @@ from keyboards.reply.admin import (
     AdminCommands,
     NotificationServiceActions,
     get_notification_service_kb,
+    PomodoroActions,
+    get_pomodoro_kb,
 )
 from keyboards.reply.base import get_start_kb, StartButtons, BaseButtons
 from keyboards.reply.notes import NotesButtons, get_notes_kb
@@ -23,4 +25,6 @@ __all__ = [
     AdminCommands,
     NotificationServiceActions,
     get_notification_service_kb,
+    PomodoroActions,
+    get_pomodoro_kb,
 ]

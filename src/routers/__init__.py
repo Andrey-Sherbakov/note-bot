@@ -10,8 +10,8 @@ router = Router(name="main_router")
 
 router.include_routers(
     callback_router,
-    admin_router,
     base_router,
+    admin_router,
 )
 # needs to be last
 router.include_router(notes_router)

@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
 
@@ -5,10 +7,20 @@ from config import settings
 
 
 class CommandsFilter(BaseFilter):
-    def __init__(self, *commands: str, require_arg: bool = False, admin: bool = False):
-        self.commands = [cmd.lower() for cmd in commands]
+    def __init__(
+        self,
+        *commands: str,
+        iterables: list[Iterable[str]] | None = None,
+        require_arg: bool = False,
+        admin: bool = False,
+    ):
+        self.commands = {cmd.lower() for cmd in commands}
         self.require_arg = require_arg
         self.admin = admin
+
+        if iterables:
+            for iterable in iterables:
+                self.commands.update({cmd.lower() for cmd in iterable})
 
     async def __call__(self, message: Message) -> bool | dict[str, str]:
         if self.admin and message.from_user.id != settings.ADMIN:
