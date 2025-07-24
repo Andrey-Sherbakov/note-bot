@@ -24,5 +24,5 @@ def get_notes_kb() -> ReplyKeyboardMarkup:
     for button in NotesButtons:
         builder.button(text=button)
 
-    builder.adjust(3, 3, 2)
+    builder.adjust(3, 3, 3)
     return builder.as_markup(resize_keyboard=True)
