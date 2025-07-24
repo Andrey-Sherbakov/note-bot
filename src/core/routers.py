@@ -7,7 +7,8 @@ from src.core.keyboards import BaseButtons, get_start_kb
 
 router = Router(name=__name__)
 
-@router.message(CommandsFilter('/start', BaseButtons.start))
+
+@router.message(CommandsFilter("/start", BaseButtons.start))
 async def handle_start(message: Message) -> None:
     await message.answer(
         f"Добро пожаловать, <b>{message.from_user.full_name}</b>!\nЭто простой бот для заметок.\n"
@@ -16,12 +17,12 @@ async def handle_start(message: Message) -> None:
     )
 
 
-@router.message(CommandsFilter('/help', BaseButtons.help))
+@router.message(CommandsFilter("/help", BaseButtons.help))
 async def handle_help(message: Message) -> None:
     await message.answer("Команды:\n - /start\n - /help\n - /notes\n - /stop")
 
 
-@router.message(CommandsFilter('/stop', BaseButtons.stop))
+@router.message(CommandsFilter("/stop", BaseButtons.stop))
 async def handle_stop(message: Message, state: FSMContext) -> None:
     await message.answer(
         f"До скорых встреч, {message.from_user.first_name}!\n"
@@ -29,6 +30,12 @@ async def handle_stop(message: Message, state: FSMContext) -> None:
         reply_markup=ReplyKeyboardRemove(),
     )
 
+    await state.clear()
+
+
+@router.message(CommandsFilter("/cancel", BaseButtons.notes))
+async def handle_cancel(message: Message, state: FSMContext) -> None:
+    await message.answer("Действие отменено.")
     await state.clear()
 
 

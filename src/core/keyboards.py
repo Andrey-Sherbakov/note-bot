@@ -9,6 +9,7 @@ class BaseButtons(enum.StrEnum):
     start = "Старт"
     help = "Помощь"
     stop = "Конец"
+    cancel = "Отмена"
     notes = "Заметки"
     admin = "Админ-Панель"
 

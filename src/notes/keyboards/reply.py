@@ -14,6 +14,7 @@ class NotesButtons(enum.StrEnum):
     update = "Изменить"
     delete = "Удалить"
     start = BaseButtons.start
+    cancel = BaseButtons.cancel
     stop = BaseButtons.stop
 
 
