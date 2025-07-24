@@ -33,7 +33,7 @@ async def handle_stop(message: Message, state: FSMContext) -> None:
     await state.clear()
 
 
-@router.message(CommandsFilter("/cancel", BaseButtons.notes))
+@router.message(CommandsFilter("/cancel", BaseButtons.cancel))
 async def handle_cancel(message: Message, state: FSMContext) -> None:
     await message.answer("Действие отменено.")
     await state.clear()
