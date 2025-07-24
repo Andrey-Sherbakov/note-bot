@@ -122,7 +122,7 @@ async def rename_note_state_new_name(new_name: str, message: Message, state: FSM
     data = await state.get_data()
     note_id = data["note_id"]
     note = await repository.get_by_id(note_id=note_id, user_id=message.from_user.id)
-    note.name = new_name
+    note.name = normalize_name(new_name)
 
     await repository.update_note(note)
     await message.answer("Заметка успешно переименована!")
